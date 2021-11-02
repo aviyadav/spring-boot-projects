@@ -24,18 +24,18 @@ repositories {
 }
 
 dependencies {
-    implementation 'org.springframework.boot:spring-boot-starter-batch:2.5.5'
-    implementation 'org.springframework.boot:spring-boot-starter-web:2.5.5'
-    compileOnly 'org.springframework.data:spring-data-jdbc:2.2.4'
+    implementation 'org.springframework.boot:spring-boot-starter-batch'
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+    compileOnly 'org.springframework.data:spring-data-jdbc'
 
-    developmentOnly 'org.springframework.boot:spring-boot-devtools:2.5.5'
-    developmentOnly 'org.springframework.boot:spring-boot-actuator:2.5.5'
+    developmentOnly 'org.springframework.boot:spring-boot-devtools'
+    developmentOnly 'org.springframework.boot:spring-boot-actuator'
 
 
-    runtimeOnly 'org.postgresql:postgresql:42.2.24.jre7'
-    annotationProcessor 'org.springframework.boot:spring-boot-configuration-processor:2.5.5'
-    testImplementation 'org.springframework.boot:spring-boot-starter-test:2.5.5'
-    testImplementation 'org.springframework.batch:spring-batch-test:4.3.3'
+    runtimeOnly 'org.postgresql:postgresql'
+    annotationProcessor 'org.springframework.boot:spring-boot-configuration-processor'
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testImplementation 'org.springframework.batch:spring-batch-test'
 }
 
 test {
