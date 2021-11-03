@@ -1,0 +1,107 @@
+<beans xmlns="http://www.springframework.org/schema/beans" xmlns:batch="http://www.springframework.org/schema/batch" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="
+           http://www.springframework.org/schema/beans
+           http://www.springframework.org/schema/beans/spring-beans.xsd
+           http://www.springframework.org/schema/batch
+           http://www.springframework.org/schema/batch/spring-batch.xsd">
+
+    <batch:job id="fullExtractJob">
+        <batch:step id="extractJobStep">
+            <batch:job ref="extractJob" />
+        </batch:step>
+    </batch:job>
+
+    <batch:job id="extractJob">
+        <batch:step id="generateQueriesStep" next="executeQueriesStep">
+            <batch:tasklet ref="generateQueriesTask" />
+        </batch:step>
+        <batch:step id="executeQueriesStep" next="mergeFilesStep">
+            <batch:partition partitioner="queryPartitioner">
+                <batch:handler task-executor="taskExecutor" />
+                <batch:step>
+                    <batch:tasklet>
+                        <batch:chunk reader="queryReader" processor="dataProcessor" writer="tempFlatFileItemWriter" commit-interval="10" />
+                    </batch:tasklet>
+                </batch:step>
+            </batch:partition>
+        </batch:step>
+        <batch:step id="mergeFilesStep" next="sendByFtpStep">
+            <batch:tasklet>
+                <batch:chunk reader="multiResourceItemReader" writer="flatFileItemWriter" commit-interval="10" />
+            </batch:tasklet>
+        </batch:step>
+        <batch:step id="sendByFtpStep" next="cleanTmpFilesStep">
+            <batch:tasklet ref="sendByFTPTask" />
+        </batch:step>
+        <batch:step id="cleanTmpFilesStep">
+            <batch:tasklet ref="cleanTempFilesTask" />
+        </batch:step>
+    </batch:job>
+
+    <bean id="generateQueriesTask" class="org.sample.spring.batch.task.GenerateQueriesTask">
+        <property name="directory" value="${my.working.directory}/tmp/queries" />
+    </bean>
+
+    <bean id="queryPartitioner" class="org.sample.spring.batch.partitioner.QueryPartitioner">
+        <property name="queriesLocation" value="file:${my.working.directory}/tmp/queries/*" />
+        <property name="tempDataLocation" value="${my.working.directory}/tmp/data/" />
+    </bean>
+
+    <bean id="queryReader" scope="step" class="org.sample.spring.batch.reader.QueryReader">
+        <property name="query" value="#{stepExecutionContext[query]}" />
+    </bean>
+
+    <bean id="dataProcessor" class="org.springframework.batch.item.support.CompositeItemProcessor">
+        <property name="delegates">
+            <list>
+                <bean scope="step" class="org.sample.spring.batch.processor.MapToXMLProcessor" />
+                <bean scope="step" class="org.sample.spring.batch.processor.XSLTProcessor">
+                    <property name="xsltFile" value="xsltProcessor1" />
+                </bean>
+                <bean scope="step" class="org.sample.spring.batch.processor.XSLTProcessor">
+                    <property name="xsltFile" value="xsltProcessor2" />
+                </bean>
+            </list>
+        </property>
+    </bean>
+
+    <bean id="tempFlatFileItemWriter" scope="step" class="org.springframework.batch.item.file.FlatFileItemWriter">
+        <property name="resource" value="#{stepExecutionContext[tempDataFileLocation]}" />
+        <property name="lineAggregator">
+            <bean class="org.springframework.batch.item.file.transform.PassThroughLineAggregator" />
+        </property>
+    </bean>
+
+    <bean id="multiResourceItemReader" scope="step" class="org.springframework.batch.item.file.MultiResourceItemReader">
+        <property name="resources" value="file:${my.working.directory}/tmp/data/*" />
+        <property name="delegate">
+            <bean scope="step" class="org.springframework.batch.item.file.FlatFileItemReader">
+                <property name="lineMapper">
+                    <bean class="org.springframework.batch.item.file.mapping.PassThroughLineMapper" />
+                </property>
+            </bean>
+        </property>
+    </bean>
+
+    <bean id="flatFileItemWriter" scope="step" class="org.springframework.batch.item.file.FlatFileItemWriter">
+        <property name="resource" value="file:${my.working.directory}/data.csv" />
+        <property name="lineAggregator">
+            <bean class="org.springframework.batch.item.file.transform.PassThroughLineAggregator" />
+        </property>
+    </bean>
+
+    <bean id="sendByFTPTask" scope="step" class="org.sample.spring.batch.task.SendByFTPTask">
+        <property name="dataFile" value="file:${my.working.directory}/data.csv" />
+    </bean>
+
+    <bean id="cleanTempFilesTask" scope="step" class="org.sample.spring.batch.task.CleanTempFilesTask">
+        <property name="resources" value="file:/${my.working.directory}/**/*" />
+    </bean>
+
+    <bean class="org.springframework.batch.core.scope.StepScope" />
+
+    <bean id="taskExecutor" class="org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor">
+        <property name="corePoolSize" value="3" />
+    </bean>
+
+</beans>

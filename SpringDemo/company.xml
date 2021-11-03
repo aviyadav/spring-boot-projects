@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<ns2:CompanyInfo xmlns:ns2="com.sample.spring.jaxb.core" Id="201">
+    <CompanyName>Apple</CompanyName>
+    <CEO_Name>Tim Cook</CEO_Name>
+    <Number_Of_Employees>35000</Number_Of_Employees>
+</ns2:CompanyInfo>

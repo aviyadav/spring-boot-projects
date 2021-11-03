@@ -1,0 +1,29 @@
+POST localhost:8080/api/notes
+json
+{"title": "My Second Note", "content": "Building REST APIs is fun."}
+
+GET localhost:8080/api/notes
+GET localhost:8080/api/notes/1
+
+PUT localhost:8080/api/notes/2
+json
+{"title": "This is My Second Note", "content": "Building REST APIs in Spring Boot is fun."}
+
+POST http://localhost:8080/posts/
+json
+{
+	"title": "Post 1",
+	"description": "Post 1 description",
+	"content": "Post 1 content"
+}
+
+GET http://localhost:8080/posts/?page=0&size=2&sort=createdAt,desc
+
+POST http://localhost:8080/posts/1/comments
+json
+{
+	"text": "Sample Text"
+}
+
+GET http://localhost:8080/posts/1/comments?page=0&size=3&sort=createdAt,desc
+

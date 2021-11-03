@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans" xmlns:batch="http://www.springframework.org/schema/batch" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+                           http://www.springframework.org/schema/batch http://www.springframework.org/schema/batch/spring-batch.xsd
+">
+    
+    <batch:job id="fullExtractJob">
+        <batch:step id="generateQueriesStep" next="executeQueriesStep">
+            <batch:tasklet ref="generateQueriesTask" />
+        </batch:step>
+        
+        <batch:step id="executeQueriesStep" next="sendByFtpStep">
+            <batch:tasklet>
+                <batch:chunk reader="queryReader" processor="dataProcessor" writer="faltFileItemWriter" commit-interval="10" />
+            </batch:tasklet>
+        </batch:step>
+        
+        <batch:step id="sendByFtpStep" next="cleanTmpFilesStep">
+            <batch:tasklet ref="sendByFtpTask" />
+        </batch:step>
+        
+        <batch:step id="cleanTmpFilesStep">
+            <batch:tasklet ref="cleanTmpFilesTask" />
+        </batch:step>
+        
+    </batch:job>
+    
+    <bean id="generateQueriesTask" class="org.sample.spring.batch.task.GenerateQueriesTask">
+        <property name="directory" value="${my.working.directory}/tmp/queries" />
+    </bean>
+    
+    <bean id="queryReader" class="org.sample.spring.batch.reader.QueryReader">
+        <property name="query" value="#{stepExecutionContext[query]}" />
+    </bean>
+    
+    <bean id="dataProcessor" class="org.springframework.batch.item.support.CompositeItemProcessor">
+        <property name="delegates">
+            <list>
+                <bean class="org.sample.spring.batch.processor.MapToXMLProcessor" />
+                <bean class="org.sample.spring.batch.processor.XSLTProcessor">
+                    <property name="xsltFile" value="xsltProcessor1" />
+                </bean>
+                <bean class="org.sample.spring.batch.processor.XSLTProcessor">
+                    <property name="xsltFile" value="xsltProcessor2" />
+                </bean>
+            </list>
+        </property>
+    </bean>
+    
+    <bean id="faltFileItemWriter" class="org.springframework.batch.item.file.FlatFileItemWriter">
+        <property name="resource" value="file:${my.working.directory}/data.csv" />
+        <property name="lineAggregator">
+            <bean class="org.springframework.batch.item.file.transform.PassThroughLineAggregator" />
+        </property>
+    </bean>
+    
+    <bean id="sendByFtpTask" class="org.sample.spring.batch.task.SendByFTPTask">
+        <property name="dataFile" value="file:${my.working.directory}/data.csv" />
+    </bean>
+
+    <bean id="cleanTmpFilesTask" scope="step" class="org.sample.spring.batch.task.CleanTempFilesTask">
+        <property name="resources" value="file:/${my.working.directory}/temp/**/*" />
+    </bean>
+	
+    <bean class="org.springframework.batch.core.scope.StepScope" />
+
+
+</beans>

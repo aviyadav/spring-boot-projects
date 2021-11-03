@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<UniversityExamResultList>
+    <ExamResult>
+        <dob>1985-02-01</dob>
+        <percentage>76.0</percentage>
+        <studentName>Student One</studentName>
+    </ExamResult>
+    <ExamResult>
+        <dob>1984-02-01</dob>
+        <percentage>77.0</percentage>
+        <studentName>Student Two</studentName>
+    </ExamResult>
+    <ExamResult>
+        <dob>1983-02-01</dob>
+        <percentage>80.0</percentage>
+        <studentName>Student Three</studentName>
+    </ExamResult>
+    <ExamResult>
+        <dob>1986-02-01</dob>
+        <percentage>86.0</percentage>
+        <studentName>Student Four</studentName>
+    </ExamResult>
+    <ExamResult>
+        <dob>1987-02-01</dob>
+        <percentage>72.0</percentage>
+        <studentName>Student Five</studentName>
+    </ExamResult>
+</UniversityExamResultList>
