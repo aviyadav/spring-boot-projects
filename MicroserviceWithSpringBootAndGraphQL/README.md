@@ -1,1 +1,24 @@
 
+/*
+	 * In PostMan use Post URL: localhost:8080/bookstore/getAllBooks
+	 * and Body: query{
+  					allBooks{
+					bookId,
+					bookName
+  					}
+				}
+	 */
+
+
+
+ /**
+ 	 * Body: query{
+ 	 * 	book(id:"101"){
+ 	 * 		bookId,
+ 	 * 		bookName,
+ 	 * 		publishedDate
+ 	 *        }
+ 	 * }
+ 	 * @param query
+ 	 * @return
+ 	 */
